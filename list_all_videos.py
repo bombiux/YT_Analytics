@@ -10,7 +10,7 @@ load_dotenv()
 YT_API_KEY = os.getenv("YT_API")
 YT_CHANNEL_MAP_STR = os.getenv("YT_CHANNEL_MAP", "")
 # Usar 7 días como valor predeterminado, igual que top_video_report.py
-YT_DAYS_TO_ANALYZE = int(os.getenv("YT_DAYS_TO_ANALYZE", 22))
+YT_DAYS_TO_ANALYZE = int(os.getenv("YT_DAYS_TO_ANALYZE", 7))
 
 CSV_OUTPUT_FILE = 'all_videos_report.csv'
 

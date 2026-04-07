@@ -3,13 +3,14 @@ import pandas as pd
 from dotenv import load_dotenv
 from googleapiclient.discovery import build
 from datetime import datetime, timedelta, timezone
+import argparse
 
 load_dotenv()
 
 # --- CONFIGURACIÓN CARGADA DESDE .env ---
 YT_API_KEY = os.getenv("YT_API")
 YT_CHANNEL_MAP_STR = os.getenv("YT_CHANNEL_MAP", "")
-YT_DAYS_TO_ANALYZE = int(7) # Default to 7 days if not set
+YT_DAYS_TO_ANALYZE = int(os.getenv("YT_DAYS_TO_ANALYZE", 7)) # Default to 7 days if not set
 
 CSV_OUTPUT_FILE = 'top_videos_report.csv'
 
@@ -102,7 +103,7 @@ def get_top_video_from_playlist(youtube, playlist_id, start_date_iso):
         print(f"Error al obtener videos de la lista {playlist_id}: {e}")
         return None
 
-def get_all_video_ids_from_playlist(youtube, playlist_id, start_date):
+def get_all_video_ids_from_playlist(youtube, playlist_id, start_date, end_date):
     """Obtiene una lista de video IDs de una playlist, filtrados por fecha."""
     video_ids = []
     next_page_token = None
@@ -118,7 +119,7 @@ def get_all_video_ids_from_playlist(youtube, playlist_id, start_date):
             for item in response.get("items", []):
                 published_at_str = item['snippet']['publishedAt']
                 published_at = datetime.fromisoformat(published_at_str.replace('Z', '+00:00'))
-                if published_at >= start_date:
+                if start_date <= published_at <= end_date:
                     video_ids.append(item['snippet']['resourceId']['videoId'])
             
             next_page_token = response.get('nextPageToken')
@@ -172,6 +173,11 @@ def find_top_video_by_stats(youtube, video_ids):
     return top_video
 
 def main():
+    parser = argparse.ArgumentParser(description="Genera reporte de top videos de YouTube en un rango de fechas.")
+    parser.add_argument('--start', type=str, help="Fecha de inicio (DD/MM/YYYY)")
+    parser.add_argument('--end', type=str, help="Fecha de fin (DD/MM/YYYY)")
+    args = parser.parse_args()
+
     print("--- Iniciando Generación de Reporte de Videos Destacados ---")
     channel_map = parse_channel_map(YT_CHANNEL_MAP_STR)
 
@@ -179,12 +185,21 @@ def main():
         print("Error: La variable de entorno YT_CHANNEL_MAP no está configurada o tiene un formato incorrecto.")
         return
 
-    # Calcular la fecha de inicio para el filtro
-    start_date = datetime.now(timezone.utc) - timedelta(days=YT_DAYS_TO_ANALYZE)
-    start_date_iso = start_date.isoformat().replace('+00:00', 'Z') # Formato requerido por la API
-    
-    day_str = "día" if YT_DAYS_TO_ANALYZE == 1 else "días"
-    print(f"Buscando videos destacados de los últimos {YT_DAYS_TO_ANALYZE} {day_str}...")
+    # Calcular fechas
+    if args.start and args.end:
+        try:
+            start_date = datetime.strptime(args.start, "%d/%m/%Y").replace(tzinfo=timezone.utc)
+            end_date = datetime.strptime(args.end, "%d/%m/%Y").replace(tzinfo=timezone.utc) + timedelta(days=1, microseconds=-1)
+            print(f"Rango de búsqueda: {args.start} al {args.end}")
+        except ValueError:
+            print("Error: Formato de fecha incorrecto. Use DD/MM/YYYY (ej. 23/02/2026).")
+            return
+    else:
+        # Fallback usando las variables de entorno
+        start_date = datetime.now(timezone.utc) - timedelta(days=YT_DAYS_TO_ANALYZE)
+        end_date = datetime.now(timezone.utc)
+        day_str = "día" if YT_DAYS_TO_ANALYZE == 1 else "días"
+        print(f"Buscando videos destacados de los últimos {YT_DAYS_TO_ANALYZE} {day_str}...")
 
     youtube = build('youtube', 'v3', developerKey=YT_API_KEY)
     
@@ -208,7 +223,7 @@ def main():
             print(f"  - Buscando en lista '{video_type}' ({playlist_id})...")
             
             # 1. Obtener todos los video IDs de la playlist filtrados por fecha
-            video_ids = get_all_video_ids_from_playlist(youtube, playlist_id, start_date)
+            video_ids = get_all_video_ids_from_playlist(youtube, playlist_id, start_date, end_date)
             
             if not video_ids:
                 print(f"    - No se encontraron videos en esta lista en el periodo especificado.")
