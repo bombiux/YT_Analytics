@@ -22,7 +22,7 @@ def get_top_5_videos_per_channel(csv_file_path, output_file='top_videos_report.c
     for channel in df['ChannelName'].unique():
         channel_data = df[df['ChannelName'] == channel]
         top_5_for_channel = channel_data.nlargest(5, 'ViewCount')
-        top_videos_by_channel[channel] = top_5_for_channel[['ChannelName', 'VideoType', 'Title', 'ViewCount']]
+        top_videos_by_channel[channel] = top_5_for_channel[['ChannelName', 'VideoType', 'Title', 'ViewCount', 'VideoID']]
         all_top_videos.append(top_5_for_channel)
 
     # Save to CSV

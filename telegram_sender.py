@@ -52,6 +52,7 @@ def format_and_send_reports(top_videos_by_channel):
             title = row['Title']
             views = int(row['ViewCount'])
             v_type = row['VideoType']
+            video_id = row['VideoID']
             
             # Limitar título largo para legibilidad
             if len(title) > 65:
@@ -60,7 +61,9 @@ def format_and_send_reports(top_videos_by_channel):
             # Escapar caracteres de HTML básico para no romper la API de telegram si el título usa <>
             title = title.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
             
-            lines.append(f"• [{v_type}] 👀 {views:,} : <i>{title}</i>")
+            # Envolver el título en un enlace clickeable hacia YouTube
+            url = f"https://youtu.be/{video_id}"
+            lines.append(f"• [{v_type}] 👀 {views:,} : <a href=\"{url}\">{title}</a>")
         lines.append("")
 
     final_message = "\n".join(lines)
