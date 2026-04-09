@@ -85,6 +85,32 @@ El archivo CSV generado tendrá las siguientes columnas:
 - `google-api-python-client`: Para interactuar con la API de YouTube.
 - `pandas`: Para la manipulación y almacenamiento de datos en formato CSV.
 - `python-dotenv`: Para cargar las variables de entorno desde el archivo `.env`.
+- `requests`: Para el envío de mensajes a la API de CallMeBot.
+
+## Despliegue en PythonAnywhere
+
+1. Inicia sesión en tu cuenta de [PythonAnywhere](https://www.pythonanywhere.com/).
+2. Abre la pestaña **Consoles** y arranca una nueva consola **Bash**.
+3. Clona tu repositorio (asegúrate de haber subido estos últimos cambios a GitHub o donde esté alojado tu código):
+   ```bash
+   git clone https://github.com/tu-usuario/tu-repo.git
+   ```
+4. Navega a la carpeta de tu proyecto:
+   ```bash
+   cd tu-repo
+   ```
+5. *(Opcional pero recomendado)* Crea y activa un entorno virtual en tu consola de PythonAnywhere, e instala las librerías:
+   ```bash
+   mkvirtualenv mi-entorno --python=python3.10
+   pip install -r requirements.txt
+   ```
+   *(Asegúrate de tener la librería `requests` listada en tu requeriments.txt)*.
+6. En PythonAnywhere, ve a la pestaña **Files**, navega hasta la carpeta del proyecto y crea un nuevo archivo indicando explícitamente el nombre `.env`.
+7. Pega la información de tus APIs y las nuevas variables de `CallMeBot` que están en el *walkthrough*.
+8. (Opcional - Automatización) Ve a la pestaña **Tasks**, y crea una tarea programada indicando el comando y la hora (en UTC) para que PythonAnywhere ejecute los scripts diariamente:
+   ```bash
+   /home/tu-usuario/.virtualenvs/mi-entorno/bin/python /home/tu-usuario/tu-repo/list_all_videos.py && /home/tu-usuario/.virtualenvs/mi-entorno/bin/python /home/tu-usuario/tu-repo/get_top_videos.py
+   ```
 
 ## Licencia
 

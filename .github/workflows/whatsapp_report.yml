@@ -1,0 +1,40 @@
+name: Reporte Semanal de YouTube a WhatsApp
+
+on:
+  schedule:
+    # 15:00 UTC = 9:00 AM UTC-6 (Nicaragua)
+    # Ejecuta todos los lunes (día 1 de la semana) a las 15:00 UTC.
+    - cron: '0 15 * * 1'
+  workflow_dispatch: # Permite ejecutar el script manualmente desde GitHub para pruebas
+
+jobs:
+  build_and_send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar Repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Instalar Dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Generar y Enviar Reporte
+        env:
+          # Estas variables se alimentarán directamente desde los "Secrets" de GitHub.
+          YT_API: ${{ secrets.YT_API }}
+          YT_CHANNEL_MAP: ${{ secrets.YT_CHANNEL_MAP }}
+          YT_DAYS_TO_ANALYZE: 7
+          WHATSAPP_NUMBER_1: ${{ secrets.WHATSAPP_NUMBER_1 }}
+          WHATSAPP_KEY_1: ${{ secrets.WHATSAPP_KEY_1 }}
+          WHATSAPP_NUMBER_2: ${{ secrets.WHATSAPP_NUMBER_2 }}
+          WHATSAPP_KEY_2: ${{ secrets.WHATSAPP_KEY_2 }}
+        run: |
+          python list_all_videos.py
+          python get_top_videos.py

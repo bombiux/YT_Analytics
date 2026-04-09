@@ -47,3 +47,7 @@ for channel, videos in top_videos_by_channel.items():
         print(f"Title: {row['Title']}")
         print(f"Views: {row['ViewCount']:,}")
         print("-"*40)
+
+# Al final, enviamos el reporte por WhatsApp
+import whatsapp_sender
+whatsapp_sender.format_and_send_reports(top_videos_by_channel)
