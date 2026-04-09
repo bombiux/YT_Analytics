@@ -1,4 +1,4 @@
-name: Reporte Semanal de YouTube a WhatsApp
+name: Reporte Semanal de YouTube a Telegram
 
 on:
   schedule:
@@ -31,10 +31,9 @@ jobs:
           YT_API: ${{ secrets.YT_API }}
           YT_CHANNEL_MAP: ${{ secrets.YT_CHANNEL_MAP }}
           YT_DAYS_TO_ANALYZE: 7
-          WHATSAPP_NUMBER_1: ${{ secrets.WHATSAPP_NUMBER_1 }}
-          WHATSAPP_KEY_1: ${{ secrets.WHATSAPP_KEY_1 }}
-          WHATSAPP_NUMBER_2: ${{ secrets.WHATSAPP_NUMBER_2 }}
-          WHATSAPP_KEY_2: ${{ secrets.WHATSAPP_KEY_2 }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID_1: ${{ secrets.TELEGRAM_CHAT_ID_1 }}
+          TELEGRAM_CHAT_ID_2: ${{ secrets.TELEGRAM_CHAT_ID_2 }}
         run: |
           python list_all_videos.py
           python get_top_videos.py

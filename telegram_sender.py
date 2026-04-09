@@ -1,0 +1,85 @@
+import os
+import requests
+from dotenv import load_dotenv
+
+def send_telegram_message(bot_token, chat_id, message):
+    """
+    Envía un mensaje de Telegram a través de la API oficial.
+    """
+    if not bot_token or not chat_id:
+        print(f"Faltan credenciales (Bot Token o Chat ID) para {chat_id}.")
+        return False
+        
+    url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+    payload = {
+        "chat_id": chat_id,
+        "text": message,
+        "parse_mode": "HTML"
+    }
+    
+    try:
+        response = requests.post(url, json=payload)
+        if response.status_code == 200:
+            print(f"[OK] Mensaje enviado por Telegram al chat {chat_id}.")
+            return True
+        else:
+            print(f"[ERROR] No se pudo enviar a {chat_id}. HTTP: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"[ERROR] Excepción al enviar mensaje de Telegram: {e}")
+        return False
+
+def format_and_send_reports(top_videos_by_channel):
+    """
+    Formatea el diccionario del Top 5 y lo envía a los chats de Telegram.
+    """
+    load_dotenv()
+    
+    tg_token = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
+    tg_chat_1 = os.getenv("TELEGRAM_CHAT_ID_1", "").strip()
+    tg_chat_2 = os.getenv("TELEGRAM_CHAT_ID_2", "").strip()
+    
+    if not top_videos_by_channel:
+        print("No hay datos en el reporte para mandar por Telegram.")
+        return
+
+    # Usamos formato HTML soportado por Telegram
+    lines = ["📊 <b>REPORTE TOP 5 VIDEOS POR CANAL</b> 📊\n"]
+    
+    for channel, videos in top_videos_by_channel.items():
+        lines.append(f"📺 <b>Canal:</b> {channel}")
+        for _, row in videos.iterrows():
+            title = row['Title']
+            views = int(row['ViewCount'])
+            v_type = row['VideoType']
+            
+            # Limitar título largo para legibilidad
+            if len(title) > 65:
+                title = title[:62] + "..."
+            
+            # Escapar caracteres de HTML básico para no romper la API de telegram si el título usa <>
+            title = title.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+            
+            lines.append(f"• [{v_type}] 👀 {views:,} : <i>{title}</i>")
+        lines.append("")
+
+    final_message = "\n".join(lines)
+
+    print("\n--- Iniciando envío hacia Telegram ---")
+    enviados = 0
+    
+    if not tg_token:
+        print("⚠️ No hay TELEGRAM_BOT_TOKEN configurado en el archivo .env")
+        return
+        
+    if tg_chat_1:
+        if send_telegram_message(tg_token, tg_chat_1, final_message):
+            enviados += 1
+    else:
+        print("⚠️  No hay TELEGRAM_CHAT_ID_1 en .env")
+        
+    if tg_chat_2:
+        if send_telegram_message(tg_token, tg_chat_2, final_message):
+            enviados += 1
+    
+    print(f"Envío por Telegram completo. Exitosos: {enviados}")
