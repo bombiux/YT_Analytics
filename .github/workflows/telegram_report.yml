@@ -2,9 +2,9 @@ name: Reporte Semanal de YouTube a Telegram
 
 on:
   schedule:
-    # 14:05 UTC = 8:05 AM UTC-6 (Nicaragua)
-    # Ejecuta todos los lunes a las 14:05 UTC.
-    - cron: '5 14 * * 1'
+    # 14:20 UTC = 8:20 AM UTC-6 (Nicaragua)
+    # Ejecuta todos los lunes a las 14:20 UTC.
+    - cron: '20 14 * * 1'
   workflow_dispatch: # Permite ejecutar el script manualmente desde GitHub para pruebas
 
 jobs:
