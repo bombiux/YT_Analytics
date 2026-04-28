@@ -3,3 +3,5 @@ pandas
 plotly
 python-dotenv
 requests
+python-pptx
+Pillow

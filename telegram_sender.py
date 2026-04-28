@@ -29,6 +29,30 @@ def send_telegram_message(bot_token, chat_id, message):
         print(f"[ERROR] Excepción al enviar mensaje de Telegram: {e}")
         return False
 
+def send_telegram_document(bot_token, chat_id, document_path):
+    """
+    Envía un documento por Telegram.
+    """
+    if not bot_token or not chat_id or not os.path.exists(document_path):
+        return False
+        
+    url = f"https://api.telegram.org/bot{bot_token}/sendDocument"
+    try:
+        with open(document_path, 'rb') as doc:
+            files = {'document': doc}
+            data = {'chat_id': chat_id}
+            response = requests.post(url, data=data, files=files)
+            if response.status_code == 200:
+                print(f"[OK] Documento enviado por Telegram al chat {chat_id}.")
+                return True
+            else:
+                print(f"[ERROR] No se pudo enviar documento a {chat_id}. HTTP: {response.status_code}")
+                return False
+    except Exception as e:
+        print(f"[ERROR] Excepción al enviar documento de Telegram: {e}")
+        return False
+
+
 def format_and_send_reports(top_videos_by_channel):
     """
     Formatea el diccionario del Top 5 y lo envía a los chats de Telegram.
@@ -78,11 +102,13 @@ def format_and_send_reports(top_videos_by_channel):
     if tg_chat_1:
         if send_telegram_message(tg_token, tg_chat_1, final_message):
             enviados += 1
+            send_telegram_document(tg_token, tg_chat_1, 'Presentacion_Top_Videos.pptx')
     else:
         print("⚠️  No hay TELEGRAM_CHAT_ID_1 en .env")
         
     if tg_chat_2:
         if send_telegram_message(tg_token, tg_chat_2, final_message):
             enviados += 1
+            send_telegram_document(tg_token, tg_chat_2, 'Presentacion_Top_Videos.pptx')
     
     print(f"Envío por Telegram completo. Exitosos: {enviados}")

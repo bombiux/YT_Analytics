@@ -48,6 +48,12 @@ for channel, videos in top_videos_by_channel.items():
         print(f"Views: {row['ViewCount']:,}")
         print("-"*40)
 
-# Al final, enviamos el reporte por Telegram
+# Al final, generamos la presentación y luego enviamos el reporte por Telegram
+try:
+    import generate_presentation
+    generate_presentation.generate_pptx()
+except Exception as e:
+    print(f"Error generando presentación: {e}")
+
 import telegram_sender
 telegram_sender.format_and_send_reports(top_videos_by_channel)
